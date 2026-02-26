@@ -1,0 +1,986 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1b1a17" />
+  <title>Living the Way — Under Oath</title>
+  <style>
+    :root{
+      --bg:#14130f;
+      --panel:#1d1a14;
+      --panel2:#231f18;
+      --ink:#e9e2d1;
+      --muted:#b7ad98;
+      --dim:#8a816f;
+      --line:#3a3326;
+      --accent:#d1b36a;  /* brass */
+      --accent2:#8fb58a; /* garden */
+      --danger:#d47b6a;
+      --ok:#7fd1a1;
+      --shadow: rgba(0,0,0,.45);
+      --radius: 14px;
+      --pad: 14px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+      --ui: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:
+        radial-gradient(1200px 800px at 20% -10%, #2a2418 0%, transparent 60%),
+        radial-gradient(900px 700px at 110% 20%, #1f2a1f 0%, transparent 55%),
+        linear-gradient(180deg, #120f0b, #0f0e0b 60%, #0d0c09);
+      color:var(--ink);
+      font-family: var(--ui);
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap{ max-width: 980px; margin: 0 auto; padding: 14px 14px 90px; }
+    .topbar{
+      position: sticky; top:0; z-index: 50;
+      padding: 10px 14px; margin: -14px -14px 12px;
+      backdrop-filter: blur(10px);
+      background: rgba(20,19,15,.65);
+      border-bottom: 1px solid rgba(58,51,38,.55);
+    }
+    .title{ display:flex; gap:10px; align-items:baseline; justify-content:space-between; }
+    .title h1{ margin:0; font-family: var(--serif); font-weight: 700; letter-spacing:.4px; font-size: 18px; }
+    .subtitle{ font-size: 12px; color: var(--muted); letter-spacing:.4px; }
+    .tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .tab{
+      padding: 8px 10px; border:1px solid var(--line); border-radius: 999px;
+      background: rgba(35,31,24,.65); color: var(--muted); font-size: 12px; letter-spacing:.3px; user-select:none;
+    }
+    .tab.active{
+      border-color: rgba(209,179,106,.85);
+      color: var(--ink);
+      box-shadow: 0 0 0 2px rgba(209,179,106,.15) inset;
+    }
+    .grid{ display:grid; gap:12px; }
+    @media (min-width: 820px){
+      .grid.two{grid-template-columns: 1.1fr .9fr;}
+      .grid.three{grid-template-columns: 1fr 1fr 1fr;}
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(35,31,24,.85), rgba(29,26,20,.85));
+      border: 1px solid rgba(58,51,38,.8);
+      border-radius: var(--radius);
+      box-shadow: 0 12px 30px var(--shadow);
+      padding: var(--pad);
+      position:relative;
+      overflow:hidden;
+    }
+    .card:before{
+      content:"";
+      position:absolute; inset:-30px -30px auto auto;
+      width:140px; height:140px;
+      background: radial-gradient(circle at 30% 30%, rgba(209,179,106,.18), transparent 70%);
+      transform: rotate(18deg);
+      pointer-events:none;
+    }
+    .card h2{ margin: 0 0 8px; font-size: 13px; letter-spacing:.8px; text-transform: uppercase; color: var(--muted); }
+    .card h3{ margin: 0 0 8px; font-family: var(--serif); font-size: 16px; letter-spacing:.3px; }
+    .row{ display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+    .pill{
+      font-family: var(--mono); font-size: 11px; color: var(--dim);
+      border:1px solid rgba(58,51,38,.8); background: rgba(18,15,11,.55);
+      border-radius: 999px; padding: 6px 10px;
+    }
+    .pill.ready{
+      color: rgba(233,226,209,.95);
+      border-color: rgba(143,181,138,.85);
+      box-shadow: 0 0 0 2px rgba(143,181,138,.12) inset;
+    }
+
+    .barWrap{
+      margin-top: 10px; border:1px solid rgba(58,51,38,.9); border-radius: 999px;
+      background: rgba(12,10,7,.55); overflow:hidden; height: 16px; position:relative;
+    }
+    .barFill{
+      height:100%; width: 0%;
+      background: linear-gradient(90deg, rgba(209,179,106,.2), rgba(209,179,106,.85), rgba(143,181,138,.75));
+      transition: width 500ms ease;
+    }
+    .barText{
+      position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+      font-size: 11px; color: rgba(233,226,209,.9);
+      text-shadow: 0 1px 0 rgba(0,0,0,.65); letter-spacing:.3px;
+    }
+
+    .actions{
+      display:grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 12px;
+    }
+    .btn{
+      border: 1px solid rgba(58,51,38,.9); border-radius: 14px; padding: 12px 10px;
+      background: rgba(35,31,24,.6); color: var(--ink);
+      user-select:none; -webkit-tap-highlight-color: transparent;
+      box-shadow: 0 8px 18px rgba(0,0,0,.35);
+      transition: transform 80ms ease; text-align:center;
+    }
+    .btn:active{transform: scale(.98)}
+    .btn .key{ font-family: var(--mono); font-weight: 700; font-size: 14px; letter-spacing: 1px; color: var(--accent); }
+    .btn .label{ display:block; margin-top: 4px; font-size: 11px; color: var(--muted); letter-spacing:.2px; min-height: 28px; }
+    .btn .xp{ display:block; margin-top: 6px; font-family: var(--mono); font-size: 11px; color: rgba(127,209,161,.95); }
+
+    .smallBtn{
+      display:inline-block; margin-top:10px; padding: 10px 12px;
+      border-radius: 12px; border:1px solid rgba(58,51,38,.9);
+      background: rgba(35,31,24,.6); color: var(--ink); font-size: 12px; user-select:none;
+    }
+    .dangerBtn{border-color: rgba(212,123,106,.75); color: rgba(212,123,106,.95)}
+    .claimBtn{
+      border-color: rgba(143,181,138,.9);
+      color: rgba(233,226,209,.95);
+      background: linear-gradient(180deg, rgba(40,60,40,.55), rgba(35,31,24,.6));
+      box-shadow: 0 0 0 2px rgba(143,181,138,.12) inset, 0 10px 20px rgba(0,0,0,.35);
+    }
+    .claimBtn[aria-disabled="true"]{
+      opacity:.45; filter: grayscale(.4);
+    }
+
+    .meter{ margin-top:10px; }
+    .meterHead{ display:flex; justify-content:space-between; gap:10px; align-items:baseline; flex-wrap:wrap; }
+    .meterName{ font-family: var(--serif); font-size: 15px; }
+    .meterMeta{ font-family: var(--mono); font-size: 11px; color: var(--dim); }
+    .tiny{ font-size: 11px; color: var(--muted); line-height: 1.35; }
+
+    .badgeGrid{ display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; }
+    @media (min-width: 520px){ .badgeGrid{grid-template-columns: repeat(4, 1fr);} }
+    .badge{
+      border:1px solid rgba(58,51,38,.9); border-radius: 14px;
+      background: rgba(18,15,11,.55); padding:10px; text-align:center;
+      opacity:.55; position:relative; overflow:hidden;
+    }
+    .badge.earned{opacity:1; border-color: rgba(209,179,106,.8)}
+    .badge img{
+      width: 100%; height: 92px; object-fit: cover;
+      border-radius: 10px; border:1px solid rgba(58,51,38,.8);
+      background: rgba(0,0,0,.15);
+    }
+    .badge .bname{ margin-top:8px; font-size: 11px; color: var(--muted); }
+    .badge.earned .bname{color: var(--ink)}
+    .lock{ position:absolute; top:8px; right:8px; font-size: 12px; opacity:.75; }
+
+    .streakRow{ display:grid; gap:10px; }
+    @media (min-width: 820px){ .streakRow{grid-template-columns: 1fr 1fr;} }
+    .streakCard{ border:1px solid rgba(58,51,38,.9); border-radius: 14px; background: rgba(18,15,11,.55); padding: 12px; }
+    .streakTitle{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .streakTitle .name{ font-family: var(--serif); font-size: 15px; }
+    .streakTitle .val{ font-family: var(--mono); font-size: 12px; color: var(--accent2); }
+    .streakHint{ margin-top:6px; font-size: 11px; color: var(--muted); line-height:1.35; }
+
+    textarea{
+      width:100%; min-height: 120px;
+      border-radius: 12px; border:1px solid rgba(58,51,38,.9);
+      background: rgba(12,10,7,.55); color: var(--ink);
+      padding: 10px; font-family: var(--mono); font-size: 11px; line-height: 1.4; outline: none;
+    }
+
+    .toast{
+      position: fixed; left: 50%; transform: translateX(-50%); bottom: 18px;
+      background: rgba(20,19,15,.92);
+      border:1px solid rgba(58,51,38,.9);
+      color: var(--ink); border-radius: 999px; padding: 10px 14px;
+      font-size: 12px; box-shadow: 0 10px 25px rgba(0,0,0,.45);
+      opacity:0; pointer-events:none;
+      transition: opacity 220ms ease, transform 220ms ease;
+      z-index: 999;
+    }
+    .toast.show{opacity:1; transform: translateX(-50%) translateY(-4px)}
+
+    /* Star sparkle overlay on Character screen */
+    .sparkleLayer{
+      position:absolute; inset:0;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    .sparkle{
+      position:absolute;
+      width:10px; height:10px;
+      background: radial-gradient(circle at 40% 40%, rgba(255,255,255,.95), rgba(209,179,106,.95) 45%, rgba(143,181,138,.0) 70%);
+      border-radius: 50%;
+      opacity: 0;
+      transform: translate(-50%,-50%) scale(.6);
+      animation: pop 900ms ease forwards;
+      filter: drop-shadow(0 0 6px rgba(209,179,106,.55));
+    }
+    @keyframes pop{
+      0%{opacity:0; transform: translate(-50%,-50%) scale(.4)}
+      20%{opacity:1}
+      60%{opacity:.9; transform: translate(-50%,-50%) scale(1.15)}
+      100%{opacity:0; transform: translate(-50%,-50%) scale(1.35)}
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="title">
+      <div>
+        <h1>Living the Way</h1>
+        <div class="subtitle">Campaign I: <b>UNDER OATH</b> <span style="opacity:.7">— Keeping the Fire</span></div>
+      </div>
+      <div class="pill" id="todayPill">—</div>
+    </div>
+    <div class="tabs" id="tabs"></div>
+  </div>
+
+  <div class="wrap">
+    <div id="view"></div>
+  </div>
+
+  <div class="toast" id="toast">Saved</div>
+
+<script>
+/* ---------- Utilities ---------- */
+const LS_KEY = "living_the_way_v2";
+const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
+const nowLocal = ()=> new Date();
+const ymd = (d)=> d.toISOString().slice(0,10);
+const startOfWeekMon = (d)=>{
+  const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const day = (date.getDay()+6)%7; // Mon=0..Sun=6
+  date.setDate(date.getDate()-day);
+  date.setHours(0,0,0,0);
+  return date;
+};
+const toast = (msg)=>{
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  setTimeout(()=>el.classList.remove("show"), 1100);
+};
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[m]));
+}
+function escapeAttr(s){ return escapeHtml(s).replace(/"/g,"&quot;"); }
+
+/* ---------- Default State ---------- */
+const defaultState = {
+  meta: { campaignTitle: "UNDER OATH", subtitle: "Keeping the Fire" },
+  character: {
+    classes: [
+      { name: "Wayfinder", rank: "Pathfinder", path: ["Scout","Pathfinder","Pilgrim","Elder Guide"] },
+      { name: "Saint", rank: "Scribe", path: ["Acolyte","Scribe","Seer","Mystic"] },
+      { name: "Earthkeeper", rank: "Listener", path: ["Listener","Tender","Husbandman","Grove-Keeper"] },
+    ],
+    stats: [
+      { key:"Vitality", val:6 },
+      { key:"Attentiveness", val:5 },
+      { key:"Resolve", val:7 },
+      { key:"Wisdom", val:7 },
+      { key:"Relational Trust", val:6 },
+      { key:"Resourcefulness", val:6 },
+    ],
+    pillars: ["Communion","Kinship","Fellowship","Provision","Vitality","Hearth & Land","Craft & Legacy"]
+  },
+  actions: {
+    A: { label:"Train", xp:10, quest:"body", streak:"workoutWeek" },
+    B: { label:"Garden Advance", xp:15, quest:"garden", streak:"gardenWeek" },
+    C: { label:"Fast Day", xp:20, quest:"fast", streak:"fastChain" },
+    D: { label:"Write Session", xp:10, quest:"writing", streak:"writingWeek" },
+    E: { label:"Circle / Guide", xp:15, quest:"circle", streak:"circleWeek" },
+  },
+  quests: {
+    body:    { name:"Reclaim the Body", xp:0, goal:80, note:"8 sessions (A) completes the arc." },
+    garden:  { name:"Break Ground",     xp:0, goal:60, note:"3 advances (B) + one milestone later." },
+    fast:    { name:"The Emptying",     xp:0, goal:60, note:"3 consecutive fast days (C) completes." },
+    writing: { name:"Name the Season",  xp:0, goal:40, note:"4 sessions (D) or 1 publish=2 later." },
+    circle:  { name:"Tend the Flame",   xp:0, goal:45, note:"2–3 meaningful moves (E) completes." },
+  },
+  streaks: {
+    dailyPresence: { current:0, best:0, lastYMD:null },
+    workoutWeek:   { current:0, best:0, weekStartYMD:null, countThisWeek:0, targetPerWeek:2 },
+    gardenWeek:    { current:0, best:0, weekStartYMD:null, countThisWeek:0, targetPerWeek:1 },
+    writingWeek:   { current:0, best:0, weekStartYMD:null, countThisWeek:0, targetPerWeek:2 },
+    circleWeek:    { current:0, best:0, weekStartYMD:null, countThisWeek:0, targetPerWeek:1 },
+    fastChain:     { current:0, best:0, lastYMD:null },
+  },
+  totals: { xp:0 },
+  log: [],
+  vault: {
+    badges: [
+      { id:"threshold_mark", name:"Threshold Mark", img:"threshold_mark.png", earned:true },
+      { id:"firekeeper", name:"Firekeeper", img:"firekeeper.png", earned:false },
+      { id:"true_scribe", name:"True Scribe", img:"true_scribe.png", earned:false },
+      { id:"watcher", name:"Watcher", img:"watcher.png", earned:false },
+      { id:"steady_hand", name:"Steady Hand", img:"steady_hand.png", earned:false },
+      { id:"clear_vessel", name:"Clear Vessel", img:"clear_vessel.png", earned:false },
+      { id:"returning_strength", name:"Returning Strength", img:"returning_strength.png", earned:false },
+      { id:"first_furrow", name:"First Furrow", img:"first_furrow.png", earned:false },
+      { id:"man_under_oath", name:"Man Under Oath", img:"man_under_oath.png", earned:false },
+    ]
+  },
+  // Level-up system
+  levelUps: {
+    queue: [],      // array of {id, title, effects:[{stat,delta}], badgeToEarn?}
+    claimed: [],    // array of ids
+    lastSparkleAt: null // ISO string
+  },
+  settingsText: ""
+};
+
+function loadState(){
+  const raw = localStorage.getItem(LS_KEY);
+  if(!raw) {
+    const st = structuredClone(defaultState);
+    st.settingsText = JSON.stringify({ actions: st.actions, quests: st.quests }, null, 2);
+    return st;
+  }
+  try{
+    const st = JSON.parse(raw);
+    // Merge with defaults to backfill missing keys
+    const merged = structuredClone(defaultState);
+    Object.assign(merged, st);
+    merged.meta = Object.assign(structuredClone(defaultState.meta), st.meta||{});
+    merged.character = Object.assign(structuredClone(defaultState.character), st.character||{});
+    merged.actions = Object.assign(structuredClone(defaultState.actions), st.actions||{});
+    merged.quests = Object.assign(structuredClone(defaultState.quests), st.quests||{});
+    merged.streaks = Object.assign(structuredClone(defaultState.streaks), st.streaks||{});
+    merged.totals = Object.assign(structuredClone(defaultState.totals), st.totals||{});
+    merged.vault = Object.assign(structuredClone(defaultState.vault), st.vault||{});
+    merged.levelUps = Object.assign(structuredClone(defaultState.levelUps), st.levelUps||{});
+    if(!merged.settingsText){
+      merged.settingsText = JSON.stringify({actions:merged.actions, quests:merged.quests}, null, 2);
+    }
+    return merged;
+  }catch(e){
+    const st = structuredClone(defaultState);
+    st.settingsText = JSON.stringify({ actions: st.actions, quests: st.quests }, null, 2);
+    return st;
+  }
+}
+function saveState(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+
+/* ---------- Core Mechanics ---------- */
+function ensureWeek(streakObj){
+  const wk = startOfWeekMon(nowLocal());
+  const wkY = ymd(wk);
+  if(streakObj.weekStartYMD !== wkY){
+    if(streakObj.weekStartYMD){
+      const met = (streakObj.countThisWeek >= (streakObj.targetPerWeek||1));
+      if(met){
+        streakObj.current += 1;
+        streakObj.best = Math.max(streakObj.best, streakObj.current);
+      }else{
+        streakObj.current = 0;
+      }
+    }
+    streakObj.weekStartYMD = wkY;
+    streakObj.countThisWeek = 0;
+  }
+}
+function updateDailyPresence(){
+  const s = state.streaks.dailyPresence;
+  const today = ymd(nowLocal());
+  if(s.lastYMD === today) return;
+  if(s.lastYMD){
+    const last = new Date(s.lastYMD+"T00:00:00");
+    const td = new Date(today+"T00:00:00");
+    const diffDays = Math.round((td-last)/(1000*60*60*24));
+    s.current = (diffDays === 1) ? (s.current + 1) : 1;
+  }else{
+    s.current = 1;
+  }
+  s.best = Math.max(s.best, s.current);
+  s.lastYMD = today;
+}
+function updateFastChain(){
+  const s = state.streaks.fastChain;
+  const today = ymd(nowLocal());
+  if(s.lastYMD === today) return;
+  if(s.lastYMD){
+    const last = new Date(s.lastYMD+"T00:00:00");
+    const td = new Date(today+"T00:00:00");
+    const diffDays = Math.round((td-last)/(1000*60*60*24));
+    s.current = (diffDays === 1) ? (s.current + 1) : 1;
+  }else{
+    s.current = 1;
+  }
+  s.best = Math.max(s.best, s.current);
+  s.lastYMD = today;
+  if(s.current >= 3){ setBadgeEarned("clear_vessel", true); }
+}
+
+function setBadgeEarned(id, earned){
+  const b = state.vault.badges.find(x=>x.id===id);
+  if(b && !b.earned && earned){
+    b.earned = true;
+    toast(`Unlocked: ${b.name}`);
+  }
+}
+
+function getStat(statName){
+  return state.character.stats.find(s=>s.key===statName);
+}
+function applyEffects(effects){
+  for(const ef of effects){
+    const s = getStat(ef.stat);
+    if(s){
+      s.val = clamp(s.val + ef.delta, 1, 10);
+    }
+  }
+}
+
+function hasLevelUpQueued(id){
+  return state.levelUps.queue.some(x=>x.id===id) || state.levelUps.claimed.includes(id);
+}
+
+/* ---------- Milestones -> Level-ups (Claimable) ---------- */
+function checkMilestones(){
+  // If a quest is complete (xp >= goal), queue its associated level-up once.
+  const q = state.quests;
+
+  const complete = (qid)=> q[qid] && q[qid].xp >= q[qid].goal;
+
+  // Package definitions (small, thematic)
+  const packages = [];
+
+  if(complete("body") && !hasLevelUpQueued("lvl_body")){
+    packages.push({
+      id:"lvl_body",
+      title:"Hardened Frame",
+      effects:[{stat:"Vitality",delta:1},{stat:"Resolve",delta:1}],
+      badgeToEarn:"returning_strength"
+    });
+  }
+  if(complete("fast") && !hasLevelUpQueued("lvl_fast")){
+    packages.push({
+      id:"lvl_fast",
+      title:"Clear Vessel",
+      effects:[{stat:"Attentiveness",delta:1},{stat:"Resolve",delta:1}],
+      badgeToEarn:"clear_vessel"
+    });
+  }
+  if(complete("garden") && !hasLevelUpQueued("lvl_garden")){
+    packages.push({
+      id:"lvl_garden",
+      title:"First Furrow",
+      effects:[{stat:"Resourcefulness",delta:1},{stat:"Wisdom",delta:1}],
+      badgeToEarn:"first_furrow"
+    });
+  }
+  if(complete("writing") && !hasLevelUpQueued("lvl_writing")){
+    packages.push({
+      id:"lvl_writing",
+      title:"True Scribe",
+      effects:[{stat:"Wisdom",delta:1},{stat:"Attentiveness",delta:1}],
+      badgeToEarn:"true_scribe"
+    });
+  }
+  if(complete("circle") && !hasLevelUpQueued("lvl_circle")){
+    packages.push({
+      id:"lvl_circle",
+      title:"Firekeeper’s Authority",
+      effects:[{stat:"Relational Trust",delta:1},{stat:"Resolve",delta:1}],
+      badgeToEarn:"firekeeper"
+    });
+  }
+
+  // Add any newly discovered packages to queue
+  for(const p of packages){
+    state.levelUps.queue.push(p);
+    toast(`Level-Up Ready: ${p.title}`);
+  }
+}
+
+function claimNextLevelUp(){
+  if(state.levelUps.queue.length === 0){
+    toast("No level-up ready");
+    return;
+  }
+  const next = state.levelUps.queue.shift();
+  applyEffects(next.effects);
+  if(next.badgeToEarn) setBadgeEarned(next.badgeToEarn, true);
+  state.levelUps.claimed.push(next.id);
+  state.levelUps.lastSparkleAt = new Date().toISOString();
+  saveState();
+  toast(`Claimed: ${next.title}`);
+  render();
+}
+
+function levelUpCount(){
+  return state.levelUps.queue.length;
+}
+
+function totalQuestProgress(){
+  const qs = Object.values(state.quests);
+  const sumXP = qs.reduce((a,q)=>a+q.xp,0);
+  const sumGoal = qs.reduce((a,q)=>a+q.goal,0);
+  return {sumXP, sumGoal, pct: sumGoal? (sumXP/sumGoal)*100 : 0};
+}
+
+/* ---------- Action Tap ---------- */
+function addXP(actionKey){
+  const a = state.actions[actionKey];
+  if(!a) return;
+
+  const xp = Number(a.xp)||0;
+  const qid = a.quest;
+  if(state.quests[qid]){
+    state.quests[qid].xp = clamp(state.quests[qid].xp + xp, 0, state.quests[qid].goal);
+  }
+  state.totals.xp += xp;
+
+  const t = nowLocal();
+  state.log.unshift({ ts: t.toISOString(), ymd: ymd(t), key: actionKey, xp });
+
+  updateDailyPresence();
+
+  const stName = a.streak;
+  if(stName && state.streaks[stName]){
+    ensureWeek(state.streaks[stName]);
+    state.streaks[stName].countThisWeek += 1;
+  }
+  if(actionKey === "C"){ updateFastChain(); }
+
+  // Simple badge triggers (soft)
+  if(actionKey === "A"){
+    const totalA = state.log.filter(e=>e.key==="A").length;
+    if(totalA >= 4) setBadgeEarned("returning_strength", true);
+  }
+  if(actionKey === "B"){
+    const totalB = state.log.filter(e=>e.key==="B").length;
+    if(totalB >= 1) setBadgeEarned("first_furrow", true);
+  }
+  if(actionKey === "E"){
+    const totalE = state.log.filter(e=>e.key==="E").length;
+    if(totalE >= 2) setBadgeEarned("firekeeper", true);
+  }
+  if(actionKey === "D"){
+    const totalD = state.log.filter(e=>e.key==="D").length;
+    if(totalD >= 2) setBadgeEarned("true_scribe", true);
+  }
+
+  checkMilestones();
+  saveState();
+  toast(`+${xp} XP`);
+  render();
+}
+
+/* ---------- Views ---------- */
+const VIEWS = [
+  { id:"home", label:"Home" },
+  { id:"character", label:"Character" },
+  { id:"quests", label:"Quests" },
+  { id:"streaks", label:"Streaks" },
+  { id:"vault", label:"Vault" },
+  { id:"settings", label:"Settings" },
+];
+let state = loadState();
+let currentView = "home";
+
+function renderTabs(){
+  const tabs = document.getElementById("tabs");
+  tabs.innerHTML = "";
+  VIEWS.forEach(v=>{
+    const b = document.createElement("div");
+    b.className = "tab"+(v.id===currentView?" active":"");
+    b.textContent = v.label;
+    b.onclick = ()=>{ currentView=v.id; render(); };
+    tabs.appendChild(b);
+  });
+}
+
+function renderHome(){
+  const {sumXP,sumGoal,pct} = totalQuestProgress();
+  const actionKeys = ["A","B","C","D","E"];
+  const legend = actionKeys.map(k=>{
+    const a = state.actions[k];
+    return `${k}: ${a?.label||""} (+${a?.xp||0})`;
+  }).join(" • ");
+
+  const ready = levelUpCount();
+  const readyPill = ready>0 ? `<span class="pill ready">LEVEL UP READY: ${ready}</span>` : `<span class="pill">No level-ups</span>`;
+  const claimBtn = ready>0
+    ? `<span class="smallBtn claimBtn" onclick="claimNextLevelUp()">Claim Level-Up</span>`
+    : `<span class="smallBtn claimBtn" aria-disabled="true">Claim Level-Up</span>`;
+
+  return `
+    <div class="grid two">
+      <div class="card">
+        <div class="row">
+          <h3 style="margin:0">Quest XP</h3>
+          <span class="pill">${sumXP} / ${sumGoal}</span>
+        </div>
+        <div class="barWrap" aria-label="Total Quest XP">
+          <div class="barFill" style="width:${clamp(pct,0,100)}%"></div>
+          <div class="barText">${Math.round(clamp(pct,0,100))}%</div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          ${readyPill}
+          ${claimBtn}
+        </div>
+
+        <div class="tiny" style="margin-top:10px">${legend}</div>
+
+        <div class="actions" style="margin-top:14px">
+          ${actionKeys.map(k=>{
+            const a = state.actions[k];
+            return `
+              <div class="btn" onclick="addXP('${k}')">
+                <div class="key">${k}</div>
+                <span class="label">${escapeHtml(a.label)}</span>
+                <span class="xp">+${a.xp} XP</span>
+              </div>
+            `;
+          }).join("")}
+        </div>
+
+        <div class="tiny" style="margin-top:12px">
+          Tap → bar moves → if a quest completes, a Level-Up is queued → you claim it on your terms.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Today</h2>
+        <div class="row">
+          <div class="pill">Daily Presence</div>
+          <div class="pill"><b>${state.streaks.dailyPresence.current}</b> (best ${state.streaks.dailyPresence.best})</div>
+        </div>
+        <div class="tiny" style="margin-top:10px">
+          Weekly streaks evaluate on Monday rollover. Fast Chain requires consecutive C-days.
+        </div>
+
+        <h2 style="margin-top:12px">Recent Log</h2>
+        <div class="tiny">
+          ${(state.log.slice(0,8).map(e=>{
+            const a = state.actions[e.key];
+            return `• ${e.ymd} — <b>${e.key}</b> ${escapeHtml(a?.label||"")} <span style="color:rgba(127,209,161,.95)">+${e.xp}</span>`;
+          }).join("<br>")) || "No actions yet."}
+        </div>
+        <div style="margin-top:12px" class="row">
+          <span class="smallBtn dangerBtn" onclick="resetLast()">Undo Last</span>
+          <span class="smallBtn dangerBtn" onclick="resetAll()">Reset All</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function sparkleLayerHTML(){
+  // If lastSparkleAt is recent (within ~2s), we will render sparkles.
+  const last = state.levelUps.lastSparkleAt ? new Date(state.levelUps.lastSparkleAt) : null;
+  const now = new Date();
+  const show = last && (now - last) < 2500;
+  if(!show) return "";
+  // Create ~18 sparkles at random-ish positions
+  const sparkles = Array.from({length:18}).map((_,i)=>{
+    const left = 12 + Math.random()*76; // %
+    const top = 16 + Math.random()*70;  // %
+    const delay = Math.random()*220;
+    const size = 8 + Math.random()*10;
+    return `<div class="sparkle" style="left:${left}%; top:${top}%; width:${size}px; height:${size}px; animation-delay:${delay}ms;"></div>`;
+  }).join("");
+  return `<div class="sparkleLayer">${sparkles}</div>`;
+}
+
+function renderCharacter(){
+  const cls = state.character.classes;
+  const stats = state.character.stats;
+  const ready = levelUpCount();
+  const readyPill = ready>0 ? `<span class="pill ready">LEVEL UP READY: ${ready}</span>` : `<span class="pill">No level-ups</span>`;
+  const claimBtn = ready>0
+    ? `<span class="smallBtn claimBtn" onclick="claimNextLevelUp()">Claim Level-Up</span>`
+    : `<span class="smallBtn claimBtn" aria-disabled="true">Claim Level-Up</span>`;
+
+  return `
+    <div class="grid two">
+      <div class="card">
+        <h2>Classes</h2>
+        ${cls.map(c=>{
+          const idx = c.path.indexOf(c.rank);
+          return `
+            <div style="margin-top:10px; padding:10px; border:1px solid rgba(58,51,38,.8); border-radius:12px; background: rgba(12,10,7,.35)">
+              <div class="row">
+                <div class="meterName">${escapeHtml(c.name)}</div>
+                <div class="pill">${escapeHtml(c.rank)}</div>
+              </div>
+              <div class="tiny" style="margin-top:8px">
+                ${c.path.map((p,i)=> i===idx ? `<b style="color:var(--accent)">${escapeHtml(p)}</b>` : `<span style="color:var(--muted)">${escapeHtml(p)}</span>`).join(" → ")}
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+
+      <div class="card" style="position:relative">
+        ${sparkleLayerHTML()}
+        <div class="row">
+          <h2 style="margin:0">Core Stats</h2>
+          ${readyPill}
+        </div>
+        ${stats.map(s=>{
+          const pct = clamp((s.val/10)*100,0,100);
+          return `
+            <div class="meter">
+              <div class="meterHead">
+                <div class="meterName">${escapeHtml(s.key)}</div>
+                <div class="meterMeta">${s.val}/10</div>
+              </div>
+              <div class="barWrap" style="height:14px">
+                <div class="barFill" style="width:${pct}%"></div>
+                <div class="barText"></div>
+              </div>
+            </div>
+          `;
+        }).join("")}
+        <div class="row" style="margin-top:12px">
+          <div class="tiny">Stats only increase when you claim.</div>
+          ${claimBtn}
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Pillars</h2>
+        <div class="tiny">${state.character.pillars.map(p=>`• ${escapeHtml(p)}`).join("<br>")}</div>
+      </div>
+
+      <div class="card">
+        <h2>Level-Up Queue</h2>
+        <div class="tiny">
+          ${(state.levelUps.queue.length===0)
+            ? "No queued level-ups."
+            : state.levelUps.queue.map((p,i)=>`• ${i+1}. <b>${escapeHtml(p.title)}</b> — ${p.effects.map(e=>`${escapeHtml(e.stat)} +${e.delta}`).join(", ")}`).join("<br>")
+          }
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderQuests(){
+  const qs = Object.entries(state.quests);
+  return `
+    <div class="grid two">
+      <div class="card">
+        <h2>Main Quests</h2>
+        ${qs.map(([id,q])=>{
+          const pct = q.goal? (q.xp/q.goal)*100 : 0;
+          return `
+            <div class="meter">
+              <div class="meterHead">
+                <div class="meterName">${escapeHtml(q.name)}</div>
+                <div class="meterMeta">${q.xp}/${q.goal}</div>
+              </div>
+              <div class="barWrap">
+                <div class="barFill" style="width:${clamp(pct,0,100)}%"></div>
+                <div class="barText">${Math.round(clamp(pct,0,100))}%</div>
+              </div>
+              <div class="tiny" style="margin-top:6px">${escapeHtml(q.note||"")}</div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+
+      <div class="card">
+        <h2>Legend</h2>
+        <div class="tiny">
+          A = ${escapeHtml(state.actions.A.label)} (+${state.actions.A.xp})<br>
+          B = ${escapeHtml(state.actions.B.label)} (+${state.actions.B.xp})<br>
+          C = ${escapeHtml(state.actions.C.label)} (+${state.actions.C.xp})<br>
+          D = ${escapeHtml(state.actions.D.label)} (+${state.actions.D.xp})<br>
+          E = ${escapeHtml(state.actions.E.label)} (+${state.actions.E.xp})
+        </div>
+        <div class="tiny" style="margin-top:10px">
+          Completing a quest queues a Level-Up package. Claim when you’re ready.
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderStreaks(){
+  ["workoutWeek","gardenWeek","writingWeek","circleWeek"].forEach(k=>ensureWeek(state.streaks[k]));
+  const s = state.streaks;
+  const wk = startOfWeekMon(nowLocal());
+  const wkLabel = ymd(wk);
+
+  return `
+    <div class="card">
+      <h2>Daily Presence</h2>
+      <div class="row">
+        <div class="meterName">Streak</div>
+        <div class="pill"><b>${s.dailyPresence.current}</b> (best ${s.dailyPresence.best})</div>
+      </div>
+      <div class="tiny" style="margin-top:6px">Any action A–E counts once per day.</div>
+    </div>
+
+    <div class="streakRow" style="margin-top:12px">
+      ${renderWeeklyCard("Workouts / Week", s.workoutWeek, wkLabel)}
+      ${renderWeeklyCard("Garden / Week", s.gardenWeek, wkLabel)}
+      ${renderWeeklyCard("Writing / Week", s.writingWeek, wkLabel)}
+      ${renderWeeklyCard("Circle / Week", s.circleWeek, wkLabel)}
+      ${renderFastCard()}
+    </div>
+  `;
+}
+function renderWeeklyCard(title, obj, wkLabel){
+  const target = obj.targetPerWeek||1;
+  const c = obj.countThisWeek||0;
+  const hint = `Week of ${wkLabel}: ${c}/${target}. On Monday rollover, if target is met → streak +1; else resets.`;
+  return `
+    <div class="streakCard">
+      <div class="streakTitle">
+        <div class="name">${escapeHtml(title)}</div>
+        <div class="val">${obj.current} <span style="color:var(--dim)">(best ${obj.best})</span></div>
+      </div>
+      <div class="barWrap" style="height:14px; margin-top:8px">
+        <div class="barFill" style="width:${clamp((c/target)*100,0,100)}%"></div>
+        <div class="barText"></div>
+      </div>
+      <div class="streakHint">${escapeHtml(hint)}</div>
+    </div>
+  `;
+}
+function renderFastCard(){
+  const s = state.streaks.fastChain;
+  const hint = `C must be logged on consecutive days. Chain resets if a day is missed.`;
+  return `
+    <div class="streakCard">
+      <div class="streakTitle">
+        <div class="name">Fast Chain</div>
+        <div class="val">${s.current} <span style="color:var(--dim)">(best ${s.best})</span></div>
+      </div>
+      <div class="barWrap" style="height:14px; margin-top:8px">
+        <div class="barFill" style="width:${clamp((s.current/3)*100,0,100)}%"></div>
+        <div class="barText"></div>
+      </div>
+      <div class="streakHint">${escapeHtml(hint)}</div>
+    </div>
+  `;
+}
+
+function renderVault(){
+  const badges = state.vault.badges;
+  return `
+    <div class="card">
+      <h2>Badge Vault</h2>
+      <div class="tiny">Put your badge PNGs next to <code>index.html</code> with the filenames shown (e.g. <code>firekeeper.png</code>, <code>threshold_mark.png</code>).</div>
+      <div class="badgeGrid" style="margin-top:12px">
+        ${badges.map(b=>{
+          const cls = b.earned ? "badge earned" : "badge";
+          const lock = b.earned ? "" : `<div class="lock">🔒</div>`;
+          return `
+            <div class="${cls}">
+              ${lock}
+              <img src="${escapeAttr(b.img)}" alt="${escapeAttr(b.name)}" onerror="this.style.opacity=.25; this.style.filter='grayscale(1)';" />
+              <div class="bname">${escapeHtml(b.name)}</div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderSettings(){
+  return `
+    <div class="grid two">
+      <div class="card">
+        <h2>Config (Actions + Quests)</h2>
+        <div class="tiny">Edit JSON to rebind A–E later. Keep meaning in chat; keep the app as controller.</div>
+        <textarea id="cfg">${escapeHtml(state.settingsText||"")}</textarea>
+        <div class="row">
+          <span class="smallBtn" onclick="applyConfig()">Apply</span>
+          <span class="smallBtn dangerBtn" onclick="exportState()">Export Save</span>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Notes</h2>
+        <div class="tiny">
+          • Quests reaching 100% queue Level-Ups (claimable).<br>
+          • Claim triggers star sparkle on Character stats.<br>
+          • LocalStorage keeps progress on this device/browser.
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- Render & Handlers ---------- */
+function render(){
+  renderTabs();
+  const view = document.getElementById("view");
+  const today = new Date();
+  document.getElementById("todayPill").textContent = today.toLocaleDateString(undefined,{weekday:"short", month:"short", day:"numeric"});
+
+  if(currentView==="home") view.innerHTML = renderHome();
+  else if(currentView==="character") view.innerHTML = renderCharacter();
+  else if(currentView==="quests") view.innerHTML = renderQuests();
+  else if(currentView==="streaks") view.innerHTML = renderStreaks();
+  else if(currentView==="vault") view.innerHTML = renderVault();
+  else if(currentView==="settings") view.innerHTML = renderSettings();
+}
+
+function renderTabs(){
+  const tabs = document.getElementById("tabs");
+  tabs.innerHTML = "";
+  VIEWS.forEach(v=>{
+    const b = document.createElement("div");
+    b.className = "tab"+(v.id===currentView?" active":"");
+    b.textContent = v.label;
+    b.onclick = ()=>{ currentView=v.id; render(); };
+    tabs.appendChild(b);
+  });
+}
+
+function applyConfig(){
+  const txt = document.getElementById("cfg").value;
+  try{
+    const cfg = JSON.parse(txt);
+    if(cfg.actions) state.actions = cfg.actions;
+    if(cfg.quests) state.quests = cfg.quests;
+    state.settingsText = JSON.stringify({actions:state.actions, quests:state.quests}, null, 2);
+    saveState();
+    toast("Config applied");
+    render();
+  }catch(e){
+    toast("Invalid JSON");
+  }
+}
+
+function resetLast(){
+  const last = state.log.shift();
+  if(!last){ toast("Nothing to undo"); return; }
+  const a = state.actions[last.key];
+  const qid = a?.quest;
+  if(qid && state.quests[qid]){
+    state.quests[qid].xp = clamp(state.quests[qid].xp - last.xp, 0, state.quests[qid].goal);
+  }
+  state.totals.xp = Math.max(0, state.totals.xp - last.xp);
+  // NOTE: streak rollback not implemented (keeps prototype simple)
+  saveState();
+  toast("Undid last");
+  render();
+}
+
+function resetAll(){
+  if(!confirm("Reset all progress on this device?")) return;
+  localStorage.removeItem(LS_KEY);
+  state = loadState();
+  toast("Reset");
+  render();
+}
+
+function exportState(){
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "living-the-way-save.json";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+window.addXP = addXP;
+window.applyConfig = applyConfig;
+window.resetLast = resetLast;
+window.resetAll = resetAll;
+window.exportState = exportState;
+window.claimNextLevelUp = claimNextLevelUp;
+
+render();
+</script>
+</body>
+</html>
